@@ -55,6 +55,73 @@ ggplot(unique_country_codes, aes(x = n, y = countryCode)) +
   theme_minimal()
 ```
 
+In order to correctly sort the instances of missing values per country code, we needed to rename the missing country code values from NA to "Unknown" so that ggplot would recognize it and include it in the ordering. 
+Somewhat surprising is the fact that USA is in the upper quartile of missing values, considering that every participating US runner has an associated state that they could have included in their registration.
+
+```{r}
+library(ggcorrplot)
+
+missing_matrix <- is.na(marathon_data)
+
+# Compute the correlation matrix of missingness
+missing_corr <- cor(missing_matrix, use = "pairwise.complete.obs")
+
+# Plot the correlation matrix
+ggcorrplot(missing_corr, title = "Correlation of Missing Data", lab = TRUE)
+```
+
+Plotting a correlation heat map helps us identify if missing values in one column is correlated with missing values in another column. 
+From this plot, we see that 'countryCode', 'bib', and 'gender' have a strong correlation which tells us that these values always have missing values simultaneously. 
+'City', 'countryCode', 'bib', and 'gender' have moderate correlations across each column which could suggest that if a value is missing in one of the 3 columns, then there's a higher chance that 'city' is missing a value as well for that entry.
+
+```{r}
+# Filter rows where "city" is missing 
+city_na_rows <- marathon_data |>
+  filter(is.na(city))
+
+# Count occurrences of countryCode in rows with missing city
+country_counts_city_na <- city_na_rows |>
+  count(countryCode, sort = TRUE)
+
+country_counts_city_na
+```
+
+```{r}
+country_counts_city_na <- country_counts_city_na |>
+  mutate(proportion_missing = n / sum(n))
+
+country_counts_full <- marathon_data |>
+  count(countryCode, sort = TRUE) |>
+  mutate(proportion_full = n / sum(n))
+
+country_comparison_city_na <- country_counts_city_na |>
+  left_join(country_counts_full, by = "countryCode", suffix = c("_missing", "_full"))
+
+# View the comparison
+country_comparison_city_na
+```
+
+```{r}
+ggplot(country_comparison_city_na, aes(x = reorder(countryCode, proportion_missing), y = proportion_missing)) +
+  geom_bar(stat = "identity", fill = "blue", alpha = 0.6) +
+  geom_point(aes(y = proportion_full), color = "red", size = 3) +
+  coord_flip() +
+  labs(title = "Proportion of Missing `city` by Country",
+       x = "Country Code",
+       y = "Proportion") +
+  theme_minimal()
+```
+
+In this bar plot, we're comparing the proportions of 'countryCode' values in rows with missing 'city' versus the entire marathon dataset. The goal is to identify whether the rows with missing 'city' values are disproportionately associated with certain countries. 
+
+Blue bars represent the proportion of rows with missing 'city' values for each 'countryCode'. The red dots show the proportion of rows for each 'countryCode' in the entire dataset (to include rows where 'city' is not missing a value). 
+
+The blue bars highlight the countries contributing to rows with missing 'city' values with the red dots providing a baseline to compare whether a country is over represented or underrepresented in rows with missing 'city' values compared to their overall representation with the dataset. 
+
+From this, we can see that the USA makes up around 70% of the total dataset meaning most runners are from the US. Even with this large percentage of runners, only about 2% of the rows with missing 'city' values are associated with the US. This could indicate that the data collection process for US participants is more robust than for international participants. It could also represent a systemic issue where missing city values disproportionately occur for non-USA participants. 
+
+Countries like ITA, MEX, and NLD seem to be highly affected by missing 'city 'values. 
+
 ## Summary
 Overall, the missing values from this dataset could be explained for a few plausible reasons:
 
