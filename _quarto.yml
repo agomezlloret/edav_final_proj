@@ -25,4 +25,5 @@ book:
 
 format:
   html:
-    the
+    theme: morph
+    code-fold: true
