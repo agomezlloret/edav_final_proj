@@ -30,11 +30,31 @@
     ]
   },
   {
+    "objectID": "data.html#summary",
+    "href": "data.html#summary",
+    "title": "2  Data",
+    "section": "2.3 Summary",
+    "text": "2.3 Summary\nOverall, the missing values from this dataset could be explained for a few plausible reasons:\n\nErrors in transferring from paper to digital data entry for registrants that filled out paper forms. With USA’s domination of online systems, this could explain the low percentage of missing values.\nTechnical issues or runner actions such as discarding the bib during the race due to it causing discomfort could result in bib and other associated data like countryCode and city to be flagged as missing.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data</span>"
+    ]
+  },
+  {
+    "objectID": "data.html#future-analysis",
+    "href": "data.html#future-analysis",
+    "title": "2  Data",
+    "section": "2.4 Future Analysis",
+    "text": "2.4 Future Analysis\nTo hone in on some of these thoughts for further exploration, we could look for data that contains registration times to see if missing values were concentrated among participants who registered late or early.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data</span>"
+    ]
+  },
+  {
     "objectID": "results.html",
     "href": "results.html",
     "title": "3  Results",
     "section": "",
-    "text": "Fantastic results!",
+    "text": "Fantastic results!\nHELLO!",
     "crumbs": [
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Results</span>"
     ]
