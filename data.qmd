@@ -55,3 +55,11 @@ ggplot(unique_country_codes, aes(x = n, y = countryCode)) +
   theme_minimal()
 ```
 
+## Summary
+Overall, the missing values from this dataset could be explained for a few plausible reasons:
+
+- Errors in transferring from paper to digital data entry for registrants that filled out paper forms. With USA's domination of online systems, this could explain the low percentage of missing values. 
+- Technical issues or runner actions such as discarding the bib during the race due to it causing discomfort could result in bib and other associated data like countryCode and city to be flagged as missing. 
+
+## Future Analysis
+To hone in on some of these thoughts for further exploration, we could look for data that contains registration times to see if missing values were concentrated among participants who registered late or early.
