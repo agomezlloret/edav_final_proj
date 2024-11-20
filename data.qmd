@@ -9,11 +9,11 @@ Questions for future research could center around analyzing impacts of national 
 
 ## Missing value analysis
 ```{r}
+#| message: FALSE
 data <- read.csv("NYC Marathon Results, 2024 - Marathon Runner Results.csv")
 library(tidyr)
 library(ggplot2)
 library(dplyr)
-head(data)
 ```
 
 ```{r}
@@ -24,16 +24,12 @@ data <- data |>
 data <- data |> 
   mutate(across(where(is.integer), ~ na_if(., -1)))
 
+# Drop IAAF Column
 marathon_data <- data[,-9]
-head(marathon_data)
 
 missing_values <- colSums(is.na(marathon_data))
 missing_values
 
-unique_country_codes <- marathon_data |> 
-  filter(is.na(stateProvince)) |> 
-  count(countryCode) 
-unique_country_codes
   
 ```
 First, we decided to drop the 'IAAF' column as it was mostly redundant with the country trigraph column and overall does not provide necessary insight into the dataset. 
@@ -41,6 +37,10 @@ First, we decided to drop the 'IAAF' column as it was mostly redundant with the 
 Looking at the original dataset, we observed that some columns contained blank entries, NA values, and "-" placeholders. To address this, we decided to transform the dataset by replacing blanks and "-" with NA. After this transformation, we found that 308 NA values remained in the 'stateProvince' column, 12 remained in the 'countryCode', 12 in 'bib', 12 in 'gender', and 62 in 'city'. Initially, we speculated that the missing values in 'stateProvince' might be due to certain countries not having a 'stateProvince' field for competitors to fill in. However, upon further investigation, we filtered for missing values in the 'stateProvince' column and identified distinct 'countryCode' values. This revealed that the USA also had missing entries, suggesting that some competitors chose not to provide a 'stateProvince' value.
 
 ```{r fig.height=12, fig.width= 12}
+unique_country_codes <- marathon_data |> 
+  filter(is.na(stateProvince)) |> 
+  count(countryCode) 
+
 unique_country_codes$countryCode[is.na(unique_country_codes$countryCode)] <- "Unknown"
 
 unique_country_codes <- unique_country_codes |> 
@@ -59,6 +59,8 @@ In order to correctly sort the instances of missing values per country code, we 
 Somewhat surprising is the fact that USA is in the upper quartile of missing values, considering that every participating US runner has an associated state that they could have included in their registration.
 
 ```{r}
+#| warning: FALSE
+
 library(ggcorrplot)
 
 missing_matrix <- is.na(marathon_data)
@@ -83,7 +85,7 @@ city_na_rows <- marathon_data |>
 country_counts_city_na <- city_na_rows |>
   count(countryCode, sort = TRUE)
 
-country_counts_city_na
+#country_counts_city_na
 ```
 
 ```{r}
@@ -98,7 +100,7 @@ country_comparison_city_na <- country_counts_city_na |>
   left_join(country_counts_full, by = "countryCode", suffix = c("_missing", "_full"))
 
 # View the comparison
-country_comparison_city_na
+#country_comparison_city_na
 ```
 
 ```{r}
