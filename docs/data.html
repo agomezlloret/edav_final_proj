@@ -590,6 +590,104 @@ Attaching package: 'lubridate'</code></pre>
 </div>
 </div>
 </div>
+<p>Question 6:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>marathon_data_clean_filtered <span class="ot">&lt;-</span> marathon_data_clean <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(gender <span class="sc">!=</span> <span class="st">"X"</span>) </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(marathon_data_clean_filtered, <span class="fu">aes</span>(<span class="at">x =</span> overallPlace, <span class="at">fill =</span> gender)) <span class="sc">+</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Density of Finish Place by Gender"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Overall Finish Place"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Density"</span>) <span class="sc">+</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"purple"</span>, <span class="st">"pink"</span>)) <span class="sc">+</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Observations:</p>
+<p>Question 7:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>top_countries <span class="ot">&lt;-</span> marathon_data_clean <span class="sc">%&gt;%</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(countryCode) <span class="sc">%&gt;%</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">10</span>, n)  <span class="co"># Get top 10 countries by count</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(top_countries, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(countryCode, <span class="sc">-</span>n), <span class="at">y =</span> n)) <span class="sc">+</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="st">"lightblue"</span>, <span class="at">color =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Top 10 Countries Participation"</span>, </span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Country"</span>, </span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Number of Participants"</span>) <span class="sc">+</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))  <span class="co"># Rotate for readability</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Observations:</p>
+<p>Question 8:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>marathon_data_clean <span class="ot">&lt;-</span> marathon_data_clean <span class="sc">%&gt;%</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    age <span class="sc">&gt;=</span> <span class="dv">18</span> <span class="sc">&amp;</span> age <span class="sc">&lt;=</span> <span class="dv">29</span> <span class="sc">~</span> <span class="st">"18-29"</span>,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    age <span class="sc">&gt;=</span> <span class="dv">30</span> <span class="sc">&amp;</span> age <span class="sc">&lt;=</span> <span class="dv">39</span> <span class="sc">~</span> <span class="st">"30-39"</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    age <span class="sc">&gt;=</span> <span class="dv">40</span> <span class="sc">&amp;</span> age <span class="sc">&lt;=</span> <span class="dv">49</span> <span class="sc">~</span> <span class="st">"40-49"</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    age <span class="sc">&gt;=</span> <span class="dv">50</span> <span class="sc">&amp;</span> age <span class="sc">&lt;=</span> <span class="dv">59</span> <span class="sc">~</span> <span class="st">"50-59"</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    age <span class="sc">&gt;=</span> <span class="dv">60</span> <span class="sc">~</span> <span class="st">"60+"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Other"</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>marathon_data_clean <span class="ot">&lt;-</span> marathon_data_clean <span class="sc">%&gt;%</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overallTimeHours =</span> overallTimeSec <span class="sc">%/%</span> <span class="dv">3600</span>,  </span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">overallTimeMinutes =</span> (overallTimeSec <span class="sc">%%</span> <span class="dv">3600</span>) <span class="sc">%/%</span> <span class="dv">60</span>)  </span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>marathon_data_clean <span class="ot">&lt;-</span> marathon_data_clean <span class="sc">%&gt;%</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overallTimeHM =</span> <span class="fu">paste</span>(overallTimeHours, <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, overallTimeMinutes), <span class="at">sep =</span> <span class="st">":"</span>))</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>age_group_18_29 <span class="ot">&lt;-</span> marathon_data_clean <span class="sc">%&gt;%</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(age_group <span class="sc">==</span> <span class="st">"18-29"</span>)</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(age_group_18_29, <span class="fu">aes</span>(<span class="at">x =</span> overallTimeSec)) <span class="sc">+</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">fill =</span> <span class="st">"lightpink"</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="cf">function</span>(x) {</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Convert seconds into hours:minutes format</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>      hours <span class="ot">&lt;-</span> x <span class="sc">%/%</span> <span class="dv">3600</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>      minutes <span class="ot">&lt;-</span> (x <span class="sc">%%</span> <span class="dv">3600</span>) <span class="sc">%/%</span> <span class="dv">60</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>      seconds <span class="ot">&lt;-</span> x <span class="sc">%%</span> <span class="dv">60</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(hours, <span class="st">"h "</span>, minutes, <span class="st">"m"</span>)</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Density of Overall Time (Hours:Minutes) for Age Group 18-29"</span>,</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Overall Time (Hours:Minutes)"</span>,</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Density"</span>) <span class="sc">+</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Observations:</p>
 </section>
 <section id="summary" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="summary"><span class="header-section-number">2.4</span> Summary</h2>

@@ -285,6 +285,84 @@ ggplot(hrs_avg_time, aes(x = racesCount, y = avg_time_hours)) +
   theme_minimal()
 
 ```
+Question 6: 
+```{r}
+marathon_data_clean_filtered <- marathon_data_clean |> 
+  filter(gender != "X") 
+
+ggplot(marathon_data_clean_filtered, aes(x = overallPlace, fill = gender)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Density of Finish Place by Gender",
+       x = "Overall Finish Place",
+       y = "Density") +
+  scale_fill_manual(values = c("purple", "pink")) +
+  theme_minimal()
+
+
+```
+Observations:
+
+Question 7:
+```{r}
+top_countries <- marathon_data_clean %>%
+  count(countryCode) %>%
+  top_n(10, n)  # Get top 10 countries by count
+
+ggplot(top_countries, aes(x = reorder(countryCode, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "lightblue", color = "darkblue") +
+  labs(title = "Top 10 Countries Participation", 
+       x = "Country", 
+       y = "Number of Participants") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate for readability
+
+```
+Observations:
+
+Question 8:
+```{r}
+
+marathon_data_clean <- marathon_data_clean %>%
+  mutate(age_group = case_when(
+    age >= 18 & age <= 29 ~ "18-29",
+    age >= 30 & age <= 39 ~ "30-39",
+    age >= 40 & age <= 49 ~ "40-49",
+    age >= 50 & age <= 59 ~ "50-59",
+    age >= 60 ~ "60+",
+    TRUE ~ "Other"
+  ))
+
+marathon_data_clean <- marathon_data_clean %>%
+  mutate(overallTimeHours = overallTimeSec %/% 3600,  
+         overallTimeMinutes = (overallTimeSec %% 3600) %/% 60)  
+
+marathon_data_clean <- marathon_data_clean %>%
+  mutate(overallTimeHM = paste(overallTimeHours, sprintf("%02d", overallTimeMinutes), sep = ":"))
+
+age_group_18_29 <- marathon_data_clean %>%
+  filter(age_group == "18-29")
+
+ggplot(age_group_18_29, aes(x = overallTimeSec)) +
+  geom_density(fill = "lightpink", color = "red", alpha = 0.6) +
+  scale_x_continuous(
+    labels = function(x) {
+      # Convert seconds into hours:minutes format
+      hours <- x %/% 3600
+      minutes <- (x %% 3600) %/% 60
+      seconds <- x %% 60
+      paste0(hours, "h ", minutes, "m")
+    }
+  ) +
+  labs(title = "Density of Overall Time (Hours:Minutes) for Age Group 18-29",
+       x = "Overall Time (Hours:Minutes)",
+       y = "Density") +
+  theme_minimal()
+
+
+```
+Observations:
+
+
 
 ## Summary
 Overall, the missing values from this dataset could be explained for a few plausible reasons:
