@@ -11,7 +11,9 @@ Questions for future research could center around analyzing impacts of national 
 
 We will import the data into R using read.csv and then will take steps to pre-process the data and conduct any required cleaning before we begin to answer our posed questions. 
 
-## Missing value analysis
+## Missing value analysis 
+
+### Exploring missing values
 ```{r}
 #| message: FALSE
 data <- read.csv("NYC Marathon Results, 2024 - Marathon Runner Results.csv")
@@ -127,6 +129,162 @@ The blue bars highlight the countries contributing to rows with missing 'city' v
 From this, we can see that the USA makes up around 70% of the total dataset meaning most runners are from the US. Even with this large percentage of runners, only about 2% of the rows with missing 'city' values are associated with the US. This could indicate that the data collection process for US participants is more robust than for international participants. It could also represent a systemic issue where missing city values disproportionately occur for non-USA participants. 
 
 Countries like ITA, MEX, and NLD seem to be highly affected by missing 'city 'values. 
+
+### Dealing with missing values
+Since stateProvince has the largest percentage of missing values out of all the columns, we want to fill out these appropriately. We are interested in looking at US primarily, so we'll focus on filling out the NAs in stateProvince where country equals US
+```{r}
+#Filtering for missing values where country is USA and either city or stateProvince are missing
+usa_missing_values <- marathon_data |> 
+  filter(countryCode == "USA" & (is.na(city) | is.na(stateProvince)))
+#Showed Austin and NYC have missing stateProvince, so imputing with TX and NY accordingly
+
+marathon_data <- marathon_data |> 
+  mutate(stateProvince = case_when(
+    city == "Austin" & is.na(stateProvince) ~ "TX",
+    city == "New York" & is.na(stateProvince) ~ "NY",
+    TRUE ~ stateProvince
+  ))
+
+usa_missing_values <- marathon_data |> 
+  filter(countryCode == "USA" & (is.na(city) | is.na(stateProvince)))
+
+```
+
+
+```{r}
+marathon_data_missing_country <- marathon_data |> 
+  filter(is.na(countryCode))
+
+marathon_data_clean <- marathon_data |> 
+  filter(!is.na(countryCode))
+```
+Noticed there are 12 rows with missing countryCode, that also have firstName as "Anonymous" and have city, gender, bib, stateProvince as NA and age as 0. Because of the lack of information, we decided to drop these rows. 
+
+```{r}
+
+write.csv(marathon_data_clean, "marathon_data_clean.csv", row.names = FALSE)
+```
+
+## Analysis 
+
+Question 1: When (in terms of age) are most participants running?
+```{r}
+library(ggplot2)
+ggplot(marathon_data_clean, aes(x = age)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Age Distribution of Marathon Participants", 
+       x = "Age", 
+       y = "Count") +
+  theme_minimal()
+```
+Observations: 
+
+
+Question 2: Are males or females more likely to run?
+```{r}
+gender_clean <- marathon_data_clean |> 
+  filter(gender %in% c("M", "W"))
+
+gender_clean <- gender_clean |> 
+  mutate(age_group = case_when(
+    age >= 18 & age <= 29 ~ "18-29",
+    age >= 30 & age <= 39 ~ "30-39",
+    age >= 40 & age <= 49 ~ "40-49",
+    age >= 50 & age <= 59 ~ "50-59",
+    age >= 60 ~ "60+",
+    TRUE ~ "Unknown"
+  ))
+
+gender_age_percentages <- gender_clean |> 
+  group_by(age_group, gender) |> 
+  summarise(count = n(), .groups = 'drop') |> 
+  group_by(age_group) |> 
+  mutate(percentage = (count / sum(count)) * 100)
+
+ggplot(gender_age_percentages, aes(x = percentage, y = age_group, fill = gender)) +
+  geom_bar(stat = "identity", position = "stack", width = 0.7) +
+  labs(title = "Gender Participation by Age Group",
+       x = "Percentage of Participants (%)", 
+       y = "Age Group") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+Observations:
+
+Question 3: On average, which are the fastest top 10 countries?
+```{r}
+library(lubridate)
+
+# Convert 'overallTime' to seconds for calculations
+marathon_data_clean <- marathon_data_clean |> 
+  filter(!is.na(overallTime)) |> 
+  mutate(overallTime = hms(overallTime),   # Parse to 'Period' object
+         overallTimeSec = as.numeric(overallTime),
+         countryCode = if_else(countryCode == "Sai", "SAI", countryCode))  # Convert to seconds
+
+# Calculate average finish time by country (in seconds), filter for top 20
+country_avg_time <- marathon_data_clean |> 
+  group_by(countryCode) |> 
+  summarise(avg_time_sec = mean(overallTimeSec, na.rm = TRUE)) |> 
+  arrange(avg_time_sec) |> 
+  head(20) |> 
+  mutate(avg_time_hours = avg_time_sec / 3600) 
+
+# Plot average finish times in hours
+ggplot(country_avg_time, aes(x = avg_time_hours, y = reorder(countryCode, avg_time_hours))) +
+  geom_point(size = 4, color = "steelblue") +  
+  geom_segment(aes(xend = 0, yend = countryCode), color = "gray") +  
+  labs(title = "Fastest Countries by Average Finish Time (NYC Marathon 2024)",
+       x = "Average Finish Time (hours)",
+       y = "Country") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 8))  
+
+```
+Observations:
+
+Question 4: Who is the fastest agre group by gender?
+```{r}
+gender_clean <- gender_clean |> 
+  mutate(overallTimeSec = as.numeric(hms(overallTime)))
+
+ggplot(gender_clean, aes(x = age_group, y = overallTimeSec, fill = gender)) +
+  geom_boxplot() +
+  scale_y_continuous(labels = scales::comma) + 
+  labs(title = "Finish Times by Age Group and Gender", 
+       x = "Age Group", 
+       y = "Finish Time (seconds)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+Observations:
+
+Question 5: Is there a correlation between the number of races a participant has ran and their finish time?
+```{r}
+# Ensure avg_time_hours and age_group are created
+hrs_avg_time <- gender_clean |> 
+  mutate(
+    avg_time_hours = overallTimeSec / 3600,  
+    age_group = case_when(                  
+      age >= 18 & age <= 29 ~ "18-29",
+      age >= 30 & age <= 39 ~ "30-39",
+      age >= 40 & age <= 49 ~ "40-49",
+      age >= 50 & age <= 59 ~ "50-59",
+      age >= 60 ~ "60+",
+      TRUE ~ "Unknown"
+    )
+  )
+
+# Plot density of race count by finish time faceted by age group
+ggplot(hrs_avg_time, aes(x = racesCount, y = avg_time_hours)) +
+  geom_point(alpha = 0.3, size = 0.5 ,color = "blue") +      
+  facet_wrap(~ age_group, scales = "free") +    
+  labs(title = "Race Count vs Finish Time by Age Group",
+       x = "Number of Races Completed",
+       y = "Finish Time (hours)") +
+  theme_minimal()
+
+```
 
 ## Summary
 Overall, the missing values from this dataset could be explained for a few plausible reasons:
