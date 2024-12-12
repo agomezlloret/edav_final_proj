@@ -1,4 +1,26 @@
 # Conclusion
 
-## Future Analysis
-To hone in on some of these thoughts for further exploration, we could look for data that contains registration times to see if missing values were concentrated among participants who registered late or early.
+So, the question remains: do we still want to tackle the 2025 NYC Marathon? While the thought of running 26.2 miles is undoubtedly daunting there's something undeniably appealing about experiencing the city which running through NYC’s iconic boroughs!
+
+Based on our analysis, here are a few key takeaways:
+
+ - Andrea (18-29 age group) and Sara (30-39) are both projected to finish in around 4:30 hours.
+ - Interestingly, prior marathon experience doesn’t seem to have a major impact on run times. In fact, it seems that ignorance might be bliss—both Andrea and Sara are first-time marathoners, yet their performance is expected to be similar to more seasoned runners.
+ - Closing the gender gap will be a challenge, but it's an essential goal for both Andrea and Sara to work toward in the coming months!
+
+However, as with any analysis, we faced certain limitations:
+
+ - Missing mile-by-mile data: Breaking down times at each mile could help us understand if runners tend to speed up or slow down toward the end.
+ - External factors: Weather conditions could significantly influence performance, and we don’t have that data for this analysis.
+ - Start time: We didn't have data on start times, which could impact performance 
+
+Looking ahead, after completing next year's marathon, we’re excited to dive deeper into some new questions:
+
+ - Is there a correlation between bib number and finish times?
+ - Do runners in specific NYC boroughs tend to perform better?
+ - And, of course, who will finish faster, Andrea or Sara?
+
+With these insights in mind, the 2025 marathon seems like not just a challenge but a chance to refine our understanding of marathon performance. Let’s see how the data plays out on the big day!
+
+
+
