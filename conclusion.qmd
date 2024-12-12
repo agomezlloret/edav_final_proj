@@ -1,1 +1,4 @@
 # Conclusion
+
+## Future Analysis
+To hone in on some of these thoughts for further exploration, we could look for data that contains registration times to see if missing values were concentrated among participants who registered late or early.

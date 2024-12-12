@@ -1,17 +1,15 @@
-# Data
-
 ## Description
 The dataset was scraped by researcher and analyst Joe Hovde from the official NYC Marathon results page for the 2024 NYC Marathon, held on November 3, 2024. The official results page is maintained by the event organizers and provides a comprehensive record of all participants’ results.
 
 The data is presented as a csv file with 17 columns and 55,525 rows. The columns include detailed attributes such as participant age, gender, country, overall time, pace, placement (overall and by category), and the number of marathons completed by each individual. With data on the run times and ages of 55 thousand runners, this is sure to be an interesting project!
 
-This dataset is static for the 2024 marathon and future updates would depend on the availability of results from subsequent marathons and similar scraping efforts. Even though this is not a dynamic dataset, it could serve as a valuable component for an ongoing project that analyzes trends over multiple years, capturing the sheer talent that participates year after year.   
+This dataset is static for the 2024 marathon and future updates would depend on the availability of results from subsequent marathons and similar scraping efforts. Even though this is not a dynamic dataset, it could serve as a valuable component for an ongoing project that analyzes trends over multiple years, capturing the sheer talent that participates year after year.  
 
-Questions for future research could center around analyzing impacts of national or global events and how that affects participation from certain countries. 
+Questions for future research could center around analyzing impacts of national or global events and how that affects participation from certain countries.
 
-We will import the data into R using read.csv and then will take steps to pre-process the data and conduct any required cleaning before we begin to answer our posed questions. 
+We will import the data into R using read.csv and then will take steps to pre-process the data and conduct any required cleaning before we begin to answer our posed questions.
 
-## Missing value analysis 
+## Missing value analysis
 
 ### Exploring missing values
 ```{r}
@@ -23,34 +21,31 @@ library(dplyr)
 ```
 
 ```{r}
-data <- data |> 
-  mutate(across(where(is.character), ~ na_if(., "-"))) |> 
+data <- data |>
+  mutate(across(where(is.character), ~ na_if(., "-"))) |>
   mutate(across(where(is.character), ~ ifelse(. == "", NA, .)))
 
-data <- data |> 
+data <- data |>
   mutate(across(where(is.integer), ~ na_if(., -1)))
 
 # Drop IAAF Column
 marathon_data <- data[,-9]
 
-missing_values <- colSums(is.na(marathon_data))
-missing_values
-
-  
+colSums(is.na(marathon_data))
 ```
-First, we decided to drop the 'IAAF' column as it was mostly redundant with the country trigraph column and overall does not provide necessary insight into the dataset. 
+First, we decided to drop the 'IAAF' column which denoted a runner's international goverenming athletics body as it was mostly redundant with the country trigraph column and overall does not provide necessary insight into the dataset.
 
 Looking at the original dataset, we observed that some columns contained blank entries, NA values, and "-" placeholders. To address this, we decided to transform the dataset by replacing blanks and "-" with NA. After this transformation, we found that 308 NA values remained in the 'stateProvince' column, 12 remained in the 'countryCode', 12 in 'bib', 12 in 'gender', and 62 in 'city'. Initially, we speculated that the missing values in 'stateProvince' might be due to certain countries not having a 'stateProvince' field for competitors to fill in. However, upon further investigation, we filtered for missing values in the 'stateProvince' column and identified distinct 'countryCode' values. This revealed that the USA also had missing entries, suggesting that some competitors chose not to provide a 'stateProvince' value.
 
 ```{r fig.height=12, fig.width= 12}
-unique_country_codes <- marathon_data |> 
-  filter(is.na(stateProvince)) |> 
-  count(countryCode) 
+unique_country_codes <- marathon_data |>
+  filter(is.na(stateProvince)) |>
+  count(countryCode)
 
 unique_country_codes$countryCode[is.na(unique_country_codes$countryCode)] <- "Unknown"
 
-unique_country_codes <- unique_country_codes |> 
-  mutate(countryCode = reorder(countryCode, n)) 
+unique_country_codes <- unique_country_codes |>
+  mutate(countryCode = reorder(countryCode, n))
 
 ggplot(unique_country_codes, aes(x = n, y = countryCode)) +
   geom_bar(stat = "identity", fill = "lightpink") +
@@ -61,7 +56,7 @@ ggplot(unique_country_codes, aes(x = n, y = countryCode)) +
   theme_minimal()
 ```
 
-In order to correctly sort the instances of missing values per country code, we needed to rename the missing country code values from NA to "Unknown" so that ggplot would recognize it and include it in the ordering. 
+In order to correctly sort the instances of missing values per country code, we needed to rename the missing country code values from NA to "Unknown" so that ggplot would recognize it and include it in the ordering.
 Somewhat surprising is the fact that USA is in the upper quartile of missing values, considering that every participating US runner has an associated state that they could have included in their registration.
 
 ```{r}
@@ -78,12 +73,12 @@ missing_corr <- cor(missing_matrix, use = "pairwise.complete.obs")
 ggcorrplot(missing_corr, title = "Correlation of Missing Data", lab = TRUE)
 ```
 
-Plotting a correlation heat map helps us identify if missing values in one column is correlated with missing values in another column. 
-From this plot, we see that 'countryCode', 'bib', and 'gender' have a strong correlation which tells us that these values always have missing values simultaneously. 
+Plotting a correlation heat map helps us identify if missing values in one column is correlated with missing values in another column.
+From this plot, we see that 'countryCode', 'bib', and 'gender' have a strong correlation which tells us that these values always have missing values simultaneously.
 'City', 'countryCode', 'bib', and 'gender' have moderate correlations across each column which could suggest that if a value is missing in one of the 3 columns, then there's a higher chance that 'city' is missing a value as well for that entry.
 
 ```{r}
-# Filter rows where "city" is missing 
+# Filter rows where "city" is missing
 city_na_rows <- marathon_data |>
   filter(is.na(city))
 
@@ -120,256 +115,52 @@ ggplot(country_comparison_city_na, aes(x = reorder(countryCode, proportion_missi
   theme_minimal()
 ```
 
-In this bar plot, we're comparing the proportions of 'countryCode' values in rows with missing 'city' versus the entire marathon dataset. The goal is to identify whether the rows with missing 'city' values are disproportionately associated with certain countries. 
+In this bar plot, we're comparing the proportions of 'countryCode' values in rows with missing 'city' versus the entire marathon dataset. The goal is to identify whether the rows with missing 'city' values are disproportionately associated with certain countries.
 
-Blue bars represent the proportion of rows with missing 'city' values for each 'countryCode'. The red dots show the proportion of rows for each 'countryCode' in the entire dataset (to include rows where 'city' is not missing a value). 
+Blue bars represent the proportion of rows with missing 'city' values for each 'countryCode'. The red dots show the proportion of rows for each 'countryCode' in the entire dataset (to include rows where 'city' is not missing a value).
 
-The blue bars highlight the countries contributing to rows with missing 'city' values with the red dots providing a baseline to compare whether a country is over represented or underrepresented in rows with missing 'city' values compared to their overall representation with the dataset. 
+The blue bars highlight the countries contributing to rows with missing 'city' values with the red dots providing a baseline to compare whether a country is over represented or underrepresented in rows with missing 'city' values compared to their overall representation with the dataset.
 
-From this, we can see that the USA makes up around 70% of the total dataset meaning most runners are from the US. Even with this large percentage of runners, only about 2% of the rows with missing 'city' values are associated with the US. This could indicate that the data collection process for US participants is more robust than for international participants. It could also represent a systemic issue where missing city values disproportionately occur for non-USA participants. 
+From this, we can see that the USA makes up around 70% of the total dataset meaning most runners are from the US. Even with this large percentage of runners, only about 2% of the rows with missing 'city' values are associated with the US. This could indicate that the data collection process for US participants is more robust than for international participants. It could also represent a systemic issue where missing city values disproportionately occur for non-USA participants.
 
-Countries like ITA, MEX, and NLD seem to be highly affected by missing 'city 'values. 
+Countries like ITA, MEX, and NLD seem to be highly affected by missing 'city 'values.
 
 ### Dealing with missing values
-Since stateProvince has the largest percentage of missing values out of all the columns, we want to fill out these appropriately. We are interested in looking at US primarily, so we'll focus on filling out the NAs in stateProvince where country equals US
+This dataset does not provide a solid opportunity to deal with the missing values by imputing them. Looking at 'stateProvince' and 'countryCode', imputing with mode would potentially lead to wrong analysis and the other columns don't provide context that could help with determining the best state or country to insert. In this vein, we decided to mostly leave the missing data as-is and work on a case-by-case basis.
+
+'stateProvince' has the largest percentage of missing values out of all the columns, but we want to fill in what we can for the USA participants in order to facilitate further analysis on USA-based runners.
+
+Out of the rows that had USA listed as the 'countryCode' and were missing 'city' or 'stateProvince', we noticed two rows that listed Dallas and New York under cities so we were able to impute the 'stateProvince' value for those 2 rows.
 ```{r}
 #Filtering for missing values where country is USA and either city or stateProvince are missing
-usa_missing_values <- marathon_data |> 
+usa_missing_values <- marathon_data |>
   filter(countryCode == "USA" & (is.na(city) | is.na(stateProvince)))
-#Showed Austin and NYC have missing stateProvince, so imputing with TX and NY accordingly
 
-marathon_data <- marathon_data |> 
+marathon_data <- marathon_data |>
   mutate(stateProvince = case_when(
     city == "Austin" & is.na(stateProvince) ~ "TX",
     city == "New York" & is.na(stateProvince) ~ "NY",
     TRUE ~ stateProvince
   ))
 
-usa_missing_values <- marathon_data |> 
+usa_missing_values <- marathon_data |>
   filter(countryCode == "USA" & (is.na(city) | is.na(stateProvince)))
 
 ```
 
-
 ```{r}
-marathon_data_missing_country <- marathon_data |> 
-  filter(is.na(countryCode))
-
-marathon_data_clean <- marathon_data |> 
-  filter(!is.na(countryCode))
-```
-Noticed there are 12 rows with missing countryCode, that also have firstName as "Anonymous" and have city, gender, bib, stateProvince as NA and age as 0. Because of the lack of information, we decided to drop these rows. 
-
-```{r}
-
-write.csv(marathon_data_clean, "marathon_data_clean.csv", row.names = FALSE)
+marathon_data_clean <- marathon_data |>
+  filter(!(is.na(countryCode) & age == 0 & is.na(gender) & firstName == "Anonymous"))
 ```
 
-## Analysis 
-
-Question 1: When (in terms of age) are most participants running?
-```{r}
-library(ggplot2)
-ggplot(marathon_data_clean, aes(x = age)) +
-  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
-  labs(title = "Age Distribution of Marathon Participants", 
-       x = "Age", 
-       y = "Count") +
-  theme_minimal()
-```
-Observations: 
-
-
-Question 2: Are males or females more likely to run?
-```{r}
-gender_clean <- marathon_data_clean |> 
-  filter(gender %in% c("M", "W"))
-
-gender_clean <- gender_clean |> 
-  mutate(age_group = case_when(
-    age >= 18 & age <= 29 ~ "18-29",
-    age >= 30 & age <= 39 ~ "30-39",
-    age >= 40 & age <= 49 ~ "40-49",
-    age >= 50 & age <= 59 ~ "50-59",
-    age >= 60 ~ "60+",
-    TRUE ~ "Unknown"
-  ))
-
-gender_age_percentages <- gender_clean |> 
-  group_by(age_group, gender) |> 
-  summarise(count = n(), .groups = 'drop') |> 
-  group_by(age_group) |> 
-  mutate(percentage = (count / sum(count)) * 100)
-
-ggplot(gender_age_percentages, aes(x = percentage, y = age_group, fill = gender)) +
-  geom_bar(stat = "identity", position = "stack", width = 0.7) +
-  labs(title = "Gender Participation by Age Group",
-       x = "Percentage of Participants (%)", 
-       y = "Age Group") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-Observations:
-
-Question 3: On average, which are the fastest top 10 countries?
-```{r}
-library(lubridate)
-
-# Convert 'overallTime' to seconds for calculations
-marathon_data_clean <- marathon_data_clean |> 
-  filter(!is.na(overallTime)) |> 
-  mutate(overallTime = hms(overallTime),   # Parse to 'Period' object
-         overallTimeSec = as.numeric(overallTime),
-         countryCode = if_else(countryCode == "Sai", "SAI", countryCode))  # Convert to seconds
-
-# Calculate average finish time by country (in seconds), filter for top 20
-country_avg_time <- marathon_data_clean |> 
-  group_by(countryCode) |> 
-  summarise(avg_time_sec = mean(overallTimeSec, na.rm = TRUE)) |> 
-  arrange(avg_time_sec) |> 
-  head(20) |> 
-  mutate(avg_time_hours = avg_time_sec / 3600) 
-
-# Plot average finish times in hours
-ggplot(country_avg_time, aes(x = avg_time_hours, y = reorder(countryCode, avg_time_hours))) +
-  geom_point(size = 4, color = "steelblue") +  
-  geom_segment(aes(xend = 0, yend = countryCode), color = "gray") +  
-  labs(title = "Fastest Countries by Average Finish Time (NYC Marathon 2024)",
-       x = "Average Finish Time (hours)",
-       y = "Country") +
-  theme_minimal() +
-  theme(axis.text.y = element_text(size = 8))  
-
-```
-Observations:
-
-Question 4: Who is the fastest agre group by gender?
-```{r}
-gender_clean <- gender_clean |> 
-  mutate(overallTimeSec = as.numeric(hms(overallTime)))
-
-ggplot(gender_clean, aes(x = age_group, y = overallTimeSec, fill = gender)) +
-  geom_boxplot() +
-  scale_y_continuous(labels = scales::comma) + 
-  labs(title = "Finish Times by Age Group and Gender", 
-       x = "Age Group", 
-       y = "Finish Time (seconds)") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-Observations:
-
-Question 5: Is there a correlation between the number of races a participant has ran and their finish time?
-```{r}
-# Ensure avg_time_hours and age_group are created
-hrs_avg_time <- gender_clean |> 
-  mutate(
-    avg_time_hours = overallTimeSec / 3600,  
-    age_group = case_when(                  
-      age >= 18 & age <= 29 ~ "18-29",
-      age >= 30 & age <= 39 ~ "30-39",
-      age >= 40 & age <= 49 ~ "40-49",
-      age >= 50 & age <= 59 ~ "50-59",
-      age >= 60 ~ "60+",
-      TRUE ~ "Unknown"
-    )
-  )
-
-# Plot density of race count by finish time faceted by age group
-ggplot(hrs_avg_time, aes(x = racesCount, y = avg_time_hours)) +
-  geom_point(alpha = 0.3, size = 0.5 ,color = "blue") +      
-  facet_wrap(~ age_group, scales = "free") +    
-  labs(title = "Race Count vs Finish Time by Age Group",
-       x = "Number of Races Completed",
-       y = "Finish Time (hours)") +
-  theme_minimal()
-
-```
-Question 6: 
-```{r}
-marathon_data_clean_filtered <- marathon_data_clean |> 
-  filter(gender != "X") 
-
-ggplot(marathon_data_clean_filtered, aes(x = overallPlace, fill = gender)) +
-  geom_density(alpha = 0.5) +
-  labs(title = "Density of Finish Place by Gender",
-       x = "Overall Finish Place",
-       y = "Density") +
-  scale_fill_manual(values = c("purple", "pink")) +
-  theme_minimal()
-
-
-```
-Observations:
-
-Question 7:
-```{r}
-top_countries <- marathon_data_clean %>%
-  count(countryCode) %>%
-  top_n(10, n)  # Get top 10 countries by count
-
-ggplot(top_countries, aes(x = reorder(countryCode, -n), y = n)) +
-  geom_bar(stat = "identity", fill = "lightblue", color = "darkblue") +
-  labs(title = "Top 10 Countries Participation", 
-       x = "Country", 
-       y = "Number of Participants") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate for readability
-
-```
-Observations:
-
-Question 8:
-```{r}
-
-marathon_data_clean <- marathon_data_clean %>%
-  mutate(age_group = case_when(
-    age >= 18 & age <= 29 ~ "18-29",
-    age >= 30 & age <= 39 ~ "30-39",
-    age >= 40 & age <= 49 ~ "40-49",
-    age >= 50 & age <= 59 ~ "50-59",
-    age >= 60 ~ "60+",
-    TRUE ~ "Other"
-  ))
-
-marathon_data_clean <- marathon_data_clean %>%
-  mutate(overallTimeHours = overallTimeSec %/% 3600,  
-         overallTimeMinutes = (overallTimeSec %% 3600) %/% 60)  
-
-marathon_data_clean <- marathon_data_clean %>%
-  mutate(overallTimeHM = paste(overallTimeHours, sprintf("%02d", overallTimeMinutes), sep = ":"))
-
-age_group_18_29 <- marathon_data_clean %>%
-  filter(age_group == "18-29")
-
-ggplot(age_group_18_29, aes(x = overallTimeSec)) +
-  geom_density(fill = "lightpink", color = "red", alpha = 0.6) +
-  scale_x_continuous(
-    labels = function(x) {
-      # Convert seconds into hours:minutes format
-      hours <- x %/% 3600
-      minutes <- (x %% 3600) %/% 60
-      seconds <- x %% 60
-      paste0(hours, "h ", minutes, "m")
-    }
-  ) +
-  labs(title = "Density of Overall Time (Hours:Minutes) for Age Group 18-29",
-       x = "Overall Time (Hours:Minutes)",
-       y = "Density") +
-  theme_minimal()
-
-
-```
-Observations:
-
-
+# Missing countryCode
+The 12 rows where 'countryCode' is missing are rows in which the 'firstName' is listed as "Anonymous" and city, gender, bib, stateProvince are listed as NA. Because of the lack of information, these missing rows will not be able to contribute to our analysis so we decided to drop them from the dataset.
 
 
 ## Summary
 Overall, the missing values from this dataset could be explained for a few plausible reasons:
 
-- Errors in transferring from paper to digital data entry for registrants that filled out paper forms. With USA's domination of online systems, this could explain the low percentage of missing values. 
-- Technical issues or runner actions such as discarding the bib during the race due to it causing discomfort could result in bib and other associated data like countryCode and city to be flagged as missing. 
+- Errors in transferring from paper to digital data entry for registrants that filled out paper forms. With USA's domination of online systems, this could explain the low percentage of missing values.
+- Technical issues or runner actions such as discarding the bib during the race due to it causing discomfort could result in bib and other associated data like countryCode and city to be flagged as missing.
 
-## Future Analysis
-To hone in on some of these thoughts for further exploration, we could look for data that contains registration times to see if missing values were concentrated among participants who registered late or early.
+As we continue analysis, we will make decisions on how to represent the missing the data for each question we want to answer. 
